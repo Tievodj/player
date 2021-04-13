@@ -9,7 +9,7 @@
         "pyrogram",
         "callsmusic"
     ],
-    "repository": "https://github.com/vincreator/KryPtoN-Music-Bot",
+    "repository": "https://github.com/Tievodj/player",
     "stack": "container",
     "env": {
         "SESSION_STRING": {
