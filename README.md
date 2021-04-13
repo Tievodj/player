@@ -18,7 +18,7 @@ Music on Voice Calls Telegram
 
 # Heroku 
 
-[![Heroku Badge](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/Tievodj/player/tree/master)
+[![Heroku Badge](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/Tievodj/player/tree/main)
 
 
 
