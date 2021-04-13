@@ -55,13 +55,9 @@ playing = False  # Tells if something is playing or not
 async def start(_, message):
     await message.reply_text(START_TEXT)
 
-@app.on_message(filters.text & cmd_filter('help'))
+@app.on_message(filters.text & cmd_filter('ayuda'))
 async def helps(_, message):
     await message.reply_text(HELP_TEXT)
-
-@app.on_message(filters.text & cmd_filter('repo'))
-async def repo(_, message):
-    await message.reply_text(REPO_TEXT)
 
 @app.on_message(filters.text & cmd_filter('ping'))
 async def ping(_, message):
@@ -71,36 +67,33 @@ async def ping(_, message):
     latency = (end - start).microseconds / 1000
     await msg.edit(f"**Pong!**\n`{latency} ms`")
 
-@app.on_message(filters.text & cmd_filter('donation'))
-async def donation(_, message):
-    await message.reply_text(DONATION_TEXT)
 
-@app.on_message(filters.text & cmd_filter('join'))
+@app.on_message(filters.text & cmd_filter('entra'))
 async def join(_, message):
     if group_calls.is_connected:
-        await message.reply_text('Bot already joined!')
+        await message.reply_text('Ya estoy Online!')
         return
     group_calls.client = app
     await group_calls.start(message.chat.id)
-    await message.reply_text('Succsessfully joined!')
+    await message.reply_text('Entrando!')
 
 @app.on_message(filters.text & cmd_filter('mute'))
 async def mute(_, message):
     group_calls.set_is_mute(is_muted=True)
-    await message.reply_text('Succsessfully muted bot!')
+    await message.reply_text('Muteado!')
 
 @app.on_message(filters.text & cmd_filter('unmute'))
 async def unmute(_, message):
     group_calls.set_is_mute(is_muted=False)
-    await message.reply_text('Succsessfully unmuted bot!')
+    await message.reply_text('Desmuteado!')
 
-@app.on_message(filters.text & cmd_filter('volume'))
+@app.on_message(filters.text & cmd_filter('volumen'))
 async def volume(_, message):
     if len(message.command) < 2:
-        await message.reply_text('You forgot to pass volume (1-200)')
+        await message.reply_text('Has olvidado pasar el volumen (1-200)')
 
     await group_calls.set_my_volume(volume=int(message.command[1]))
-    await message.reply_text(f'Volume changed to {message.command[1]}')
+    await message.reply_text(f'Se ha cambiado el volumen a: {message.command[1]}')
 
 @app.on_message(filters.text & cmd_filter('stop'))
 async def stop(_, message):
@@ -108,31 +101,31 @@ async def stop(_, message):
     group_calls.stop_playout()
     queue.clear()
     playing = False
-    await message.reply_text('Succsessfully stopped song!')
+    await message.reply_text('Detenida reproducción!')
 
-@app.on_message(filters.text & cmd_filter('leave'))
+@app.on_message(filters.text & cmd_filter('sal'))
 async def leave(_, message):
     global playing
     if not group_calls.is_connected:
-        await message.reply_text('Bot already leaved!')
+        await message.reply_text('No estoy en la llamada!')
         return
     await group_calls.stop()
     queue.clear()
     playing = False
     group_calls.input_filename = ''
-    await message.reply_text('Succsessfully leaved!')
+    await message.reply_text('Saliendo!')
 
 @app.on_message(filters.text & cmd_filter('kill'))
 async def killbot(_, message):
-    await send("__**Killed!__**")
+    await send("__**Reiniciando!__**")
     quit()
 
 @app.on_message(filters.text & cmd_filter('play'))
 async def queues(_, message):
     if not group_calls.is_connected:
-        await message.reply_text('Bot not joined on Voice Calls!')
+        await message.reply_text('No estoy en la llamada!')
         return
-    usage = "**Usage:**\n__**/play youtube Song_Name**__"
+    usage = "**Uso:**\n__**/play youtube Nombre_Canción**__"
     if len(message.command) < 3:
         await message.reply_text(usage)
         return
@@ -145,7 +138,7 @@ async def queues(_, message):
         await message.reply_text(usage)
         return
     if len(queue) > 0:
-        await message.reply_text("__**Added To Queue.__**")
+        await message.reply_text("__**Agregado a la cola.__**")
         queue.append({"service": service, "song": song_name,
                       "requested_by": requested_by})
         await play()
@@ -158,23 +151,23 @@ async def queues(_, message):
 async def skip(_, message):
     global playing
     if len(queue) == 0:
-        await message.reply_text("__**Queue Is Empty, Just Like Your Life.**__")
+        await message.reply_text("__**La cola esta vacía.**__")
         return
     playing = False
-    await message.reply_text("__**Skipped!**__")
+    await message.reply_text("__**Saltado!**__")
     await play()
 
-@app.on_message(filters.text & cmd_filter('queue'))
+@app.on_message(filters.text & cmd_filter('cola'))
 async def queue_list(_, message):
     if len(queue) != 0:
         i = 1
         text = ""
         for song in queue:
-            text += f"**{i}. Platform:** __**{song['service']}**__ | **Song:** __**{song['song']}**__\n"
+            text += f"**{i}. Platforma:** __**{song['service']}**__ | **Canción:** __**{song['song']}**__\n"
             i += 1
         await message.reply_text(text)
     else:
-        await message.reply_text("__**Queue Is Empty, Just Like Your Life.**__")
+        await message.reply_text("__**La cola está vacia.**__")
 
 # Queue handler
 
@@ -219,7 +212,7 @@ async def play():
 
 async def deezer(requested_by, query):
     global playing
-    m = await send(f"__**Searching for {query} on Deezer.**__")
+    m = await send(f"__**Buscando {query} en Spotify.**__")
     try:
         songs = await arq.deezer(query, 1)
         title = songs[0].title
@@ -228,19 +221,19 @@ async def deezer(requested_by, query):
         artist = songs[0].artist
         url = songs[0].url
     except Exception as e:
-        await m.edit("__**Found No Song Matching Your Query.**__")
+        await m.edit("__**No se ha encontrado nada.**__")
         playing = False
         print(str(e))
         return
-    await m.edit("__**Generating Thumbnail.**__")
+    await m.edit("__**Generando carátula.**__")
     await generate_cover_square(requested_by, title, artist, duration, thumbnail)
-    await m.edit("__**Downloading And Transcoding.**__")
+    await m.edit("__**Descargando & Convirtiendo.**__")
     await download_and_transcode_song(url)
     await m.delete()
     m = await app.send_photo(
         chat_id=sudo_chat_id,
         photo="final.png",
-        caption=f"**Playing** __**[{title}]({url})**__ **Via Deezer.**",
+        caption=f"**Reproduciendo** __**[{title}]({url})**__ **Via Spotify.**",
     )
     os.remove("final.png")
     group_calls.input_filename = raw_filename
@@ -254,7 +247,7 @@ async def deezer(requested_by, query):
 
 async def jiosaavn(requested_by, query):
     global playing
-    m = await send(f"__**Searching for {query} on JioSaavn.**__")
+    m = await send(f"__**Buscando {query} en JioSaavn.**__")
     try:
         songs = await arq.saavn(query)
         sname = songs[0].song
@@ -264,20 +257,20 @@ async def jiosaavn(requested_by, query):
         sduration = songs[0].duration
         sduration_converted = convert_seconds(int(sduration))
     except Exception as e:
-        await m.edit("__**Found No Song Matching Your Query.**__")
+        await m.edit("__**No se ha encontrado nada.**__")
         print(str(e))
         playing = False
         return
-    await m.edit("__**Processing Thumbnail.**__")
+    await m.edit("__**Generando carátula.**__")
     await generate_cover_square(
         requested_by, sname, ssingers, sduration_converted, sthumb
     )
-    await m.edit("__**Downloading And Transcoding.**__")
+    await m.edit("__**Descargando & Convirtiendo.**__")
     await download_and_transcode_song(slink)
     await m.delete()
     m = await app.send_photo(
         chat_id=sudo_chat_id,
-        caption=f"**Playing** __**{sname}**__ **Via Jiosaavn.**",
+        caption=f"**Reproduciendo** __**{sname}**__ **Via Jiosaavn.**",
         photo="final.png",
     )
     os.remove("final.png")
@@ -293,7 +286,7 @@ async def jiosaavn(requested_by, query):
 async def ytplay(requested_by, query):
     global playing
     ydl_opts = {"format": "bestaudio"}
-    m = await send(f"__**Searching for {query} on YouTube.**__")
+    m = await send(f"__**Buscando {query} en YouTube.**__")
     try:
         results = await arq.youtube(query, 1)
         link = f"https://youtube.com{results[0].url_suffix}"
@@ -302,28 +295,28 @@ async def ytplay(requested_by, query):
         duration = results[0].duration
         views = results[0].views
         if time_to_seconds(duration) >= 1800:
-            await m.edit("__**Bruh! Only songs within 30 Mins.**__")
+            await m.edit("__**Upss! Solo canciones de menos de 30 minutos.**__")
             playing = False
             return
     except Exception as e:
-        await m.edit("__**Found No Song Matching Your Query.**__")
+        await m.edit("__**No se ha encontrado nada.**__")
         playing = False
         print(str(e))
         return
-    await m.edit("__**Processing Thumbnail.**__")
+    await m.edit("__**Generando carátula.**__")
     await generate_cover(requested_by, title, views, duration, thumbnail)
-    await m.edit("__**Downloading Music.**__")
+    await m.edit("__**Descargando música.**__")
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(link, download=False)
         audio_file = ydl.prepare_filename(info_dict)
         ydl.process_info(info_dict)
-    await m.edit("__**Transcoding.**__")
+    await m.edit("__**Convirtiendo.**__")
     os.rename(audio_file, "audio.webm")
     transcode("audio.webm")
     await m.delete()
     m = await app.send_photo(
         chat_id=sudo_chat_id,
-        caption=f"**Playing** __**[{title}]({link})**__ **Via YouTube.**",
+        caption=f"**Reproduciendo** __**[{title}]({link})**__ **Via YouTube.**",
         photo="final.png",
     )
     os.remove("final.png")
@@ -336,5 +329,5 @@ async def send(text):
     m = await app.send_message(sudo_chat_id, text=text, disable_web_page_preview=True)
     return m
 
-print('[INFO] Bot is running...\n')
+print('[INFO] Bot iniciado...\n')
 app.run()
