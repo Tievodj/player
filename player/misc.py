@@ -16,3 +16,6 @@ HELP_TEXT = """__**Música en el chat de Voz**__
 
 START_TEXT = "__**Hola desde la estación de La Nave Radio. Reprodusco música en el chat de voz, escribe /ayuda para ver mis comandos.**__"
 
+REPO_TEXT = """"""
+
+DONATION_TEXT = """"""
